@@ -14,7 +14,7 @@ class Xls2Lua():
         '''
         self.pyBook = {
             sheetname1 = [
-                {c1 = v1,c2=v2,...}
+                [(c1,v1),(c2,v2),...]
                 ,...
             ],...
         }
@@ -42,7 +42,7 @@ class Xls2Lua():
             #default value
             defaultCells = sheet.row(2)
             for ridx in xrange(3, sheet.nrows):
-                row  = {}
+                row  = []
                 for cidx in xrange(sheet.ncols):
                     cell = sheet.cell(ridx,cidx)
 
@@ -50,7 +50,8 @@ class Xls2Lua():
                     if cell.ctype == xlrd.XL_CELL_EMPTY or cell.ctype == xlrd.XL_CELL_BLANK:
                         cell = defaultCells[cidx]
                     value =  Xls2Lua.format(cell,book.datemode)
-                    row[propNames[cidx]] = value
+                    row.append((propNames[cidx],value))
+                    #row[propNames[cidx]] = value
                 pySheet.append(row)
             self.pyBook[sheet.name] = pySheet
 
@@ -70,7 +71,8 @@ class Xls2Lua():
             for i in range(n):
                 row = sheet[i]
                 file.write('\t{')
-                for colName, value in row.items():
+
+                for colName, value in row:
                     try:
                         if type(value) is int:
                             strV = '%d' % value
@@ -120,4 +122,3 @@ if __name__ == '__main__':
 
 
 #TODO:  1.从命令行参数运行
-#       2.字段顺序固定与excel一致
