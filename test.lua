@@ -1,4 +1,4 @@
--- 本文件由脚本自动生成！
+-- I was  generated automatically! ^_^
 
 
 data = { Sheet1 = {}, Roles = {},}
