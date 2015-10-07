@@ -1,4 +1,5 @@
--- This file is created by script!
+-- 本文件由脚本自动生成！
+
 
 data = { Sheet1 = {}, Roles = {},}
 

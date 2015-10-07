@@ -5,7 +5,8 @@ import sys
 import xlrd
 
 
-HDLC = '''-- This file is created by script!'''
+HDLC = u'''-- 本文件由脚本自动生成！\n\n
+'''
 
 class Xls2Lua():
     def __init__(self,input, output):
@@ -25,7 +26,7 @@ class Xls2Lua():
         if not os.path.isfile(filename):
             raise NameError, 'invalid file name ' % filename
 
-        book = xlrd.open_workbook(filename, formatting_info = True, encoding_override = 'utf-8')
+        book = xlrd.open_workbook(filename, formatting_info = True)
 
         self.pyBook = {}
         for sheet in book.sheets():
@@ -56,21 +57,19 @@ class Xls2Lua():
             self.pyBook[sheet.name] = pySheet
 
     def toLua(self, outfile = '-'):
-        file = open(outfile,'w')
-        
-        file.write(HDLC + '\n\n')
+        content = HDLC
         # write sheet names.
-        file.write('data = {')
+        content += 'data = {'
         for name in self.pyBook.keys():
-            file.write(' %s = {},' % name)
-        file.write('}\n\n')
+            content += ' %s = {},' % name
+        content += '}\n\n'
 
         for sheetname, sheet in self.pyBook.items():
-            file.write('data.%s = {\n' % sheetname)
+            content += 'data.%s = {\n' % sheetname
             n = len(sheet)
             for i in range(n):
                 row = sheet[i]
-                file.write('\t{')
+                content += '\t{'
 
                 for colName, value in row:
                     try:
@@ -79,14 +78,19 @@ class Xls2Lua():
                         elif type(value) is float:
                             strV = '%0.8g' % value
                         else:
-                            v = ("%s"%(value)).encode("UTF-8")
-                            strV = '[[%s]]' % (v)
-                        file.write(' %s = %s,' % (colName, strV))
+                            strV = '[[%s]]' % (value)
+                        content += ' %s = %s,' % (colName, strV)
                     except Exception, e:
                         raise Exception("Format string error: (sheet:%s,row:%d,column:%s) : %s"%(sheetname,i,colName,str(e)))
-                file.write(' },\n')
-            file.write('}\n\n')
-        file.close()
+                content += ' },\n'
+            content += '}\n\n'
+
+        if outfile and outfile != '-':
+            file = open(outfile,'w')
+            file.write(content.encode('utf-8'))
+            file.close()
+        else:
+            print content
 
     @staticmethod
     def format(cell,datemode):
